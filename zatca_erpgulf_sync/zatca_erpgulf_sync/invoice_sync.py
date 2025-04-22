@@ -144,7 +144,7 @@ import frappe
 import base64
 
 @frappe.whitelist(allow_guest=True)
-def create_simple_sales_invoice(customer_name, items, posting_date, due_date, custom_user_invoice_number, taxes=None, discount_amount=0, discount_percentage=0, tax_category="Standard"):
+def create_simple_sales_invoice(customer_name, items, posting_date, due_date, custom_user_invoice_number, taxes=None, discount_amount=0, discount_percentage=0, tax_category=None):
     if not items:
         return Response(json.dumps({"data": "items information not provided"}), status=404, mimetype='application/json')
 
@@ -191,9 +191,10 @@ def create_simple_sales_invoice(customer_name, items, posting_date, due_date, cu
             return Response(json.dumps({"message": f"Income Account '{income_account}' not found"}), status=404, mimetype='application/json')
 
         invoice_item = {
-            "item_code": item_code,
+            "item_name": item_code,
             "qty": quantity,
             "rate": rate,
+            "price_list_rate":rate,
             "income_account": income_account,
             "description": description,
             "item_tax_template": item_tax_template
@@ -206,14 +207,14 @@ def create_simple_sales_invoice(customer_name, items, posting_date, due_date, cu
         for tax in taxes:
             charge_type = tax.get("charge_type")
             account_head = tax.get("account_head")
-            amount = tax.get("amount")
+            rate = tax.get("rate") 
             description = tax.get("description", "No description provided")
 
-            if charge_type and account_head and amount is not None:
+            if charge_type and account_head and rate is not None:
                 taxes_list.append({
                     "charge_type": charge_type,
                     "account_head": account_head,
-                    "tax_amount": amount,
+                    "rate": rate,
                     "description": description,
                     "tax_category": tax_category
                 })
@@ -225,7 +226,8 @@ def create_simple_sales_invoice(customer_name, items, posting_date, due_date, cu
             "customer": customer_id,
             "posting_date": posting_date,
             "due_date": due_date,
-            "custom_user_invoice_number": custom_user_invoice_number,  # Include custom field
+            "custom_user_invoice_number": custom_user_invoice_number, 
+            "custom_zatca_tax_category": tax_category, # Include custom field
             "items": invoice_items,
             "taxes": taxes_list,
             "additional_discount_percentage": discount_percentage,
