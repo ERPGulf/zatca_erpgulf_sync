@@ -12,8 +12,7 @@ On first submission, the intermediary server will attempt to post the invoice to
 If the intermediary server fails to receive a response from ZATCA immediately, it will respond with a "Waiting for Response" status.
 For any subsequent calls for the same invoice, the intermediary server will respond with the QR code, XML, and ZATCA response if available. Otherwise, it will return either a "Pending" or "Error" status. In such cases, the user needs to either re-submit (in case of "Pending") or correct the error (in case of "Error").
 
-
-### Request
+## Request Body
 
 ```bash
 curl --location 'https://zatca.erpgulf.com:3717/api/method/zatca_erpgulf_sync.zatca_erpgulf_sync.invoice_sync.create_simple_sales_invoice' \
@@ -46,7 +45,8 @@ curl --location 'https://zatca.erpgulf.com:3717/api/method/zatca_erpgulf_sync.za
     }
   ]
 }'
-## ZATCA Invoice PDF/A-3 Generation API
+
+ZATCA Invoice PDF/A-3 Generation API
 
 This document provides instructions for integrating with the ZATCA Invoice PDF/A-3 Generation API. The API generates a PDF/A-3 version of a Sales Invoice by accepting the invoice number, print format, and language as input parameters. The generated PDF includes the associated XML embedded in the PDF.
 
