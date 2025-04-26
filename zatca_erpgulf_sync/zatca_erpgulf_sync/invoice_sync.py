@@ -41,15 +41,15 @@ def create_simple_sales_invoice(
         existing_doc = frappe.get_doc("Sales Invoice", existing_invoice[0]["name"])
         xml_content = download_xml(existing_doc.name)
         xml_str = xml_content.decode("utf-8")
-        qr_image_content = download_image(existing_doc.name)
-        qr_image_base64 = base64.b64encode(qr_image_content).decode("utf-8")
+        qr_image_content = get_invoice_qr_image(existing_doc.name)
+        # qr_image_base64 = base64.b64encode(qr_image_content).decode("utf-8")
 
         existing_response = {
             "invoice_id": existing_doc.name,
             "uuid": existing_doc.custom_uuid,
             "zatca_full_response": existing_doc.custom_zatca_full_response,
             "xml": xml_str,
-            "qr_image": qr_image_base64,
+            "qr_image": qr_image_content,
         }
 
         return Response(
