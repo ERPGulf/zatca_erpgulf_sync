@@ -45,8 +45,11 @@ curl --location 'https://zatca.erpgulf.com:3717/api/method/zatca_erpgulf_sync.za
     }
   ]
 }'
+```
 
-ZATCA Invoice PDF/A-3 Generation API
+---
+
+## ZATCA Invoice PDF/A-3 Generation API
 
 This document provides instructions for integrating with the ZATCA Invoice PDF/A-3 Generation API. The API generates a PDF/A-3 version of a Sales Invoice by accepting the invoice number, print format, and language as input parameters. The generated PDF includes the associated XML embedded in the PDF.
 
