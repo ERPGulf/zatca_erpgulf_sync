@@ -2,10 +2,7 @@
 
 This document provides instructions for integrating with the ZATCA Invoice APIs for submitting sales invoices and generating PDF/A-3 invoices with embedded XML.
 
-## Table of Contents
 
-1. [Submit Sales Invoice](#submit-sales-invoice)
-2. [Download PDF/A-3 Invoice](#download-pdfa-3-invoice)
 
 ---
 
