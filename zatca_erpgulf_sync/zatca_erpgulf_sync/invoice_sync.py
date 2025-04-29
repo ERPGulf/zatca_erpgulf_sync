@@ -5,6 +5,317 @@ import frappe
 import base64
 
 
+# @frappe.whitelist(allow_guest=True)
+# def create_simple_sales_invoice(
+#     customer_name,
+#     items,
+#     posting_date,
+#     due_date,
+#     custom_user_invoice_number,
+#     taxes=None,
+#     is_b2c=False,
+#     discount_amount=0,
+#     discount_percentage=0,
+#     tax_category=None,
+# ):
+#     if not items:
+#         return Response(
+#             json.dumps({"data": "items information not provided"}),
+#             status=404,
+#             mimetype="application/json",
+#         )
+
+#     # Check for duplicate custom_user_invoice_number
+#     # existing_invoice = frappe.get_all("Sales Invoice", filters={"custom_user_invoice_number": custom_user_invoice_number})
+#     # if existing_invoice:
+#     #     return Response(
+#     #         json.dumps({"message": "Duplicate invoice number"}),
+#     #         status=409,
+#     #         mimetype='application/json'
+#     #     )
+#     existing_invoice = frappe.get_all(
+#         "Sales Invoice",
+#         filters={"custom_user_invoice_number": custom_user_invoice_number},
+#     )
+#     if existing_invoice:
+#         existing_doc = frappe.get_doc("Sales Invoice", existing_invoice[0]["name"])
+#         xml_content = download_xml(existing_doc.name)
+#         xml_str = xml_content.decode("utf-8")
+#         qr_image_content = get_invoice_qr_image(existing_doc.name)
+#         # qr_image_base64 = base64.b64encode(qr_image_content).decode("utf-8")
+
+#         existing_response = {
+#             "invoice_id": existing_doc.name,
+#             "uuid": existing_doc.custom_uuid,
+#             "zatca_full_response": existing_doc.custom_zatca_full_response,
+#             "xml": xml_str,
+#             "qr_image": qr_image_content,
+#         }
+
+#         return Response(
+#             json.dumps(
+#                 {"data": existing_response, "message": "Duplicate invoice reused"}
+#             ),
+#             status=200,
+#             mimetype="application/json",
+#         )
+
+    
+#     customer_details = frappe.get_all(
+#         "Customer", fields=["name"], filters={"customer_name": customer_name}
+#     )
+#     if not customer_details:
+#         try:
+#             # Create the customer
+#             new_customer = frappe.get_doc(
+#                 {
+#                     "doctype": "Customer",
+#                     "customer_name": customer_name,
+#                     "customer_type": "Individual",
+#                     "customer_group": "Demo Customer Group",
+#                     "territory": "All Territories",
+#                     "custom_b2c": is_b2c,  # Set custom B2C checkbox
+#                 }
+#             )
+#             new_customer.insert(ignore_permissions=True)
+#             frappe.db.commit()
+#             customer_id = new_customer.name
+
+#             # Create default address for the new customer
+#             default_address = frappe.get_doc(
+#                 {
+#                     "doctype": "Address",
+#                     "address_title": customer_name,
+#                     "address_type": "Billing",
+#                     "customer": customer_id,
+#                     "address_line1": "riyadh",
+#                     "address_line2": "8659",
+#                     "city": "riyadh",
+#                     "state": "Saudi Arabia",
+#                     "country": "Saudi Arabia",
+#                     "pincode": "87695",
+#                     "custom_building_number": "4444",
+                    
+#                     "links": [
+#                         {"link_doctype": "Customer", "link_name": customer_id},
+                        
+#                     ],
+#                 }
+#             )
+#             default_address.insert(ignore_permissions=True)
+#             frappe.db.commit()
+#             # Set as customer's primary address
+#             frappe.db.set_value(
+#                 "Customer",
+#                 customer_id,
+#                 "customer_primary_address",
+#                 default_address.name,
+#             )
+#             frappe.db.commit()
+
+#         except Exception as e:
+#             return Response(
+#                 json.dumps(
+#                     {"message": f"Failed to create customer or address: {str(e)}"}
+#                 ),
+#                 status=404,
+#                 mimetype="application/json",
+#             )
+#     else:
+#         customer_id = customer_details[0]["name"]
+
+#     # Prepare items with income accounts, descriptions, and tax templates
+#     # invoice_items = []
+
+#     # for item in items:
+#     #     item_code = item["item_name"]
+#     #     quantity = item.get("quantity", 0)
+#     #     rate = item.get("rate", 0)
+#     #     income_account = item.get("income_account")
+#     #     description = item.get("description", "No description provided")
+#     #     item_tax_template = item.get("item_tax_template", "")
+
+#     #     # Validate income account
+#     #     if income_account and not frappe.db.exists("Account", income_account):
+#     #         return Response(json.dumps({"message": f"Income Account '{income_account}' not found"}), status=404, mimetype='application/json')
+
+#     #     invoice_item = {
+#     #         "item_name": item_code,
+#     #         "qty": quantity,
+#     #         "rate": rate,
+#     #         "price_list_rate":rate,
+#     #         "income_account": income_account,
+#     #         "description": description,
+#     #         "item_tax_template": item_tax_template
+#     #     }
+#     #     invoice_items.append(invoice_item)
+#     invoice_items = []
+#     for item in items:
+#         item_code = item["item_name"]
+#         quantity = item.get("quantity", 0)
+#         rate = item.get("rate", 0)
+#         income_account = item.get("income_account")
+#         description = item.get("description", "No description provided")
+#         item_tax_template = item.get("item_tax_template", "")
+
+#         # Create item if not exists
+#         if not frappe.db.exists("Item", {"item_name": item_code}):
+#             try:
+#                 new_item_doc = frappe.get_doc(
+#                     {
+#                         "doctype": "Item",
+#                         "item_code": item_code,
+#                         "item_name": item_code,
+#                         "item_group": "All Item Groups",
+#                         "stock_uom": "Nos",
+#                         "is_sales_item": 1,
+#                         "description": description,
+#                     }
+#                 )
+#                 new_item_doc.insert(ignore_permissions=True)
+#                 frappe.db.commit()
+
+#             except Exception as e:
+#                 return Response(
+#                     json.dumps(
+#                         {"message": f"Failed to create item '{item_code}': {str(e)}"}
+#                     ),
+#                     status=500,
+#                     mimetype="application/json",
+#                 )
+
+#         if income_account and not frappe.db.exists("Account", income_account):
+#             return Response(
+#                 json.dumps({"message": f"Income Account '{income_account}' not found"}),
+#                 status=404,
+#                 mimetype="application/json",
+#             )
+
+#         invoice_item = {
+#             "item_name": item_code,
+#             "qty": quantity,
+#             "rate": rate,
+#             "price_list_rate": rate,
+#             "income_account": income_account,
+#             "description": description,
+#             "item_tax_template": item_tax_template,
+#         }
+#         invoice_items.append(invoice_item)
+#     # invoice_items = []
+#     # for item in items:
+#     #     item_code = item["item_name"]
+#     #     quantity = item.get("quantity", 0)
+#     #     rate = item.get("rate", 0)
+#     #     income_account = item.get("income_account")
+#     #     description = item.get("description", "No description provided")
+#     #     item_tax_template = item.get("item_tax_template", "")
+
+#     #     if income_account and not frappe.db.exists("Account", income_account):
+#     #         return Response(json.dumps({"message": f"Income Account '{income_account}' not found"}), status=404, mimetype='application/json')
+
+#     #     invoice_item = {
+#     #         "item_name": item_code,
+#     #         "qty": quantity,
+#     #         "rate": rate,
+#     #         "price_list_rate": rate,
+#     #         "income_account": income_account,
+#     #         "description": description,
+#     #         "item_tax_template": item_tax_template
+#     #     }
+#     #     invoice_items.append(invoice_item)
+#     # Prepare taxes if provided, with category and additional fields
+#     taxes_list = []
+#     if taxes:
+#         for tax in taxes:
+#             charge_type = tax.get("charge_type")
+#             account_head = tax.get("account_head")
+#             rate = tax.get("rate")
+#             description = tax.get("description", "No description provided")
+
+#             if charge_type and account_head and rate is not None:
+#                 taxes_list.append(
+#                     {
+#                         "charge_type": charge_type,
+#                         "account_head": account_head,
+#                         "rate": rate,
+#                         "description": description,
+#                         "tax_category": tax_category,
+#                     }
+#                 )
+#     # Create Sales Invoice with discounts and tax information
+#     try:
+#         new_invoice = frappe.get_doc(
+#             {
+#                 "doctype": "Sales Invoice",
+#                 "customer": customer_id,
+#                 "posting_date": posting_date,
+#                 "due_date": due_date,
+#                 "custom_user_invoice_number": custom_user_invoice_number,
+#                 "custom_zatca_tax_category": tax_category,  # Include custom field
+#                 "items": invoice_items,
+#                 "taxes": taxes_list,
+#                 "additional_discount_percentage": discount_percentage,
+#                 "discount_amount": discount_amount,
+#                 "apply_discount_on": "Net Total",
+#             }
+#         )
+
+#         new_invoice.insert(ignore_permissions=True)
+#         new_invoice.submit()
+#         new_invoice.reload()  # Check the ZATCA status after submitting the invoice
+#         # If ZATCA status is 503, return a 503 response
+#         if new_invoice.custom_zatca_status == "503 Service Unavailable":
+#             return Response(
+#                 json.dumps(
+#                     {
+#                         "data": {
+#                             "invoice_id": new_invoice.name,
+#                             "uuid": new_invoice.custom_uuid,
+#                             "zatca_full_response": new_invoice.custom_zatca_full_response,
+#                         },
+#                         "message": "Service Unavailable",
+#                     }
+#                 ),
+#                 status=503,
+#                 mimetype="application/json",
+#             )
+#         if not new_invoice.custom_zatca_full_response:
+#             return Response(
+#                 json.dumps(
+#                     {
+#                         "data": {
+#                             "invoice_id": new_invoice.name,
+#                             "uuid": new_invoice.custom_uuid,
+#                             "zatca_full_response": None,
+#                         },
+#                         "message": "Waiting for response",
+#                     }
+#                 ),
+#                 status=202,  # 202 Accepted (still processing)
+#                 mimetype="application/json",
+#             )
+#         xml_content = download_xml(new_invoice.name)
+#         xml_str = xml_content.decode("utf-8")
+#         # Prepare and return response with invoice detail if no 503 error
+#         qr_image_content = get_invoice_qr_image(new_invoice.name)
+#         # qr_image_base64 = base64.b64encode(qr_image_content).decode("utf-8")
+
+#         customer_info = {
+#             "invoice_id": new_invoice.name,
+#             "uuid": new_invoice.custom_uuid,
+#             "zatca_full_response": new_invoice.custom_zatca_full_response,
+#             "xml": xml_str,
+#             "qr_image": qr_image_content,
+#         }
+#         return Response(
+#             json.dumps({"data": customer_info}), status=200, mimetype="application/json"
+#         )
+
+#     except Exception as e:
+#         return Response(
+#             json.dumps({"message": str(e)}), status=404, mimetype="application/json"
+#         )
+
 @frappe.whitelist(allow_guest=True)
 def create_simple_sales_invoice(
     customer_name,
@@ -15,24 +326,19 @@ def create_simple_sales_invoice(
     taxes=None,
     is_b2c=False,
     discount_amount=0,
-    discount_percentage=0,
     tax_category=None,
+    is_return=0,  # 👈 Credit Note flag
+    return_against=None,
+    custom_exemption_reason_code="Standard 15%",  # 👈 Invoice to link back (mandatory for credit note)
 ):
     if not items:
         return Response(
-            json.dumps({"data": "items information not provided"}),
+            json.dumps({"data": "Items information not provided"}),
             status=404,
             mimetype="application/json",
         )
 
-    # Check for duplicate custom_user_invoice_number
-    # existing_invoice = frappe.get_all("Sales Invoice", filters={"custom_user_invoice_number": custom_user_invoice_number})
-    # if existing_invoice:
-    #     return Response(
-    #         json.dumps({"message": "Duplicate invoice number"}),
-    #         status=409,
-    #         mimetype='application/json'
-    #     )
+    # Check for duplicate invoice by custom_user_invoice_number
     existing_invoice = frappe.get_all(
         "Sales Invoice",
         filters={"custom_user_invoice_number": custom_user_invoice_number},
@@ -42,7 +348,6 @@ def create_simple_sales_invoice(
         xml_content = download_xml(existing_doc.name)
         xml_str = xml_content.decode("utf-8")
         qr_image_content = get_invoice_qr_image(existing_doc.name)
-        # qr_image_base64 = base64.b64encode(qr_image_content).decode("utf-8")
 
         existing_response = {
             "invoice_id": existing_doc.name,
@@ -60,54 +365,45 @@ def create_simple_sales_invoice(
             mimetype="application/json",
         )
 
-    
+    # Check if customer exists, else create
     customer_details = frappe.get_all(
         "Customer", fields=["name"], filters={"customer_name": customer_name}
     )
     if not customer_details:
         try:
-            # Create the customer
-            new_customer = frappe.get_doc(
-                {
-                    "doctype": "Customer",
-                    "customer_name": customer_name,
-                    "customer_type": "Individual",
-                    "customer_group": "Demo Customer Group",
-                    "territory": "All Territories",
-                    "custom_b2c": is_b2c,  # Set custom B2C checkbox
-                }
-            )
+            new_customer = frappe.get_doc({
+                "doctype": "Customer",
+                "customer_name": customer_name,
+                "customer_type": "Individual",
+                "customer_group": "Demo Customer Group",
+                "territory": "All Territories",
+                "custom_b2c": is_b2c,
+                "custom_buyer_id_type":"NAT",
+                "custom_buyer_id" :"786531"
+            })
             new_customer.insert(ignore_permissions=True)
             frappe.db.commit()
+
             customer_id = new_customer.name
 
-            # Create default address for the new customer
-            default_address = frappe.get_doc(
-                {
-                    "doctype": "Address",
-                    "address_title": customer_name,
-                    "address_type": "Billing",
-                    "customer": customer_id,
-                    "address_line1": "riyadh",
-                    "address_line2": "8659",
-                    "city": "riyadh",
-                    "state": "Saudi Arabia",
-                    "country": "Saudi Arabia",
-                    "pincode": "87695",
-                    "custom_building_number": "4444",
-                    "is_your_company_address": 1,
-                    "links": [
-                        {"link_doctype": "Customer", "link_name": customer_id},
-                        {
-                            "link_doctype": "Company",
-                            "link_name": "Zatca",  # Replace this with your real company name
-                        },
-                    ],
-                }
-            )
+            # Create default address
+            default_address = frappe.get_doc({
+                "doctype": "Address",
+                "address_title": customer_name,
+                "address_type": "Billing",
+                "customer": customer_id,
+                "address_line1": "riyadh",
+                "address_line2": "8659",
+                "city": "riyadh",
+                "state": "Saudi Arabia",
+                "country": "Saudi Arabia",
+                "pincode": "87695",
+                "custom_building_number": "4444",
+                "links": [{"link_doctype": "Customer", "link_name": customer_id}],
+            })
             default_address.insert(ignore_permissions=True)
             frappe.db.commit()
-            # Set as customer's primary address
+
             frappe.db.set_value(
                 "Customer",
                 customer_id,
@@ -118,74 +414,70 @@ def create_simple_sales_invoice(
 
         except Exception as e:
             return Response(
-                json.dumps(
-                    {"message": f"Failed to create customer or address: {str(e)}"}
-                ),
+                json.dumps({"message": f"Failed to create customer: {str(e)}"}),
                 status=404,
                 mimetype="application/json",
             )
     else:
         customer_id = customer_details[0]["name"]
 
-    # Prepare items with income accounts, descriptions, and tax templates
-    # invoice_items = []
-
-    # for item in items:
-    #     item_code = item["item_name"]
-    #     quantity = item.get("quantity", 0)
-    #     rate = item.get("rate", 0)
-    #     income_account = item.get("income_account")
-    #     description = item.get("description", "No description provided")
-    #     item_tax_template = item.get("item_tax_template", "")
-
-    #     # Validate income account
-    #     if income_account and not frappe.db.exists("Account", income_account):
-    #         return Response(json.dumps({"message": f"Income Account '{income_account}' not found"}), status=404, mimetype='application/json')
-
-    #     invoice_item = {
-    #         "item_name": item_code,
-    #         "qty": quantity,
-    #         "rate": rate,
-    #         "price_list_rate":rate,
-    #         "income_account": income_account,
-    #         "description": description,
-    #         "item_tax_template": item_tax_template
-    #     }
-    #     invoice_items.append(invoice_item)
+    # Prepare Invoice Items
     invoice_items = []
     for item in items:
-        item_code = item["item_name"]
+        item_name = item["item_name"]
+    
+    # Fetch the item_code from the Item Doctype based on item_name
+        item_docname = frappe.get_value("Item", {"item_name": item_name}, "name")
+        if not item_docname:
+            try:
+                new_item = frappe.get_doc({
+                    "doctype": "Item",
+                    "item_code": item_name,
+                    "item_name": item_name,
+                    "item_group": "All Item Groups",
+                    "stock_uom": "Nos",
+                    "is_sales_item": 1,
+                    "description": item.get("description", "No description provided"),
+                }).insert(ignore_permissions=True)
+                frappe.db.commit()
+                item_docname = new_item.name
+            except Exception as e:
+                return Response(
+                    json.dumps({"message": f"Failed to create item '{item_name}': {str(e)}"}),
+                    status=500,
+                    mimetype="application/json",
+                )
+
+
         quantity = item.get("quantity", 0)
+        discount_amount_item = item.get("discount_amount", 0)
         rate = item.get("rate", 0)
         income_account = item.get("income_account")
         description = item.get("description", "No description provided")
         item_tax_template = item.get("item_tax_template", "")
+        final_rate = rate - discount_amount_item
+        if final_rate < 0:
+            final_rate = 0
 
-        # Create item if not exists
-        if not frappe.db.exists("Item", {"item_name": item_code}):
-            try:
-                new_item_doc = frappe.get_doc(
-                    {
-                        "doctype": "Item",
-                        "item_code": item_code,
-                        "item_name": item_code,
-                        "item_group": "All Item Groups",
-                        "stock_uom": "Nos",
-                        "is_sales_item": 1,
-                        "description": description,
-                    }
-                )
-                new_item_doc.insert(ignore_permissions=True)
-                frappe.db.commit()
-
-            except Exception as e:
-                return Response(
-                    json.dumps(
-                        {"message": f"Failed to create item '{item_code}': {str(e)}"}
-                    ),
-                    status=500,
-                    mimetype="application/json",
-                )
+        # Auto-create item if not exists
+        # if not frappe.db.exists("Item", {"item_name": item_name}):
+        #     try:
+        #         frappe.get_doc({
+        #             "doctype": "Item",
+        #             "item_code": item_name,
+        #             "item_name": item_name,
+        #             "item_group": "All Item Groups",
+        #             "stock_uom": "Nos",
+        #             "is_sales_item": 1,
+        #             "description": description,
+        #         }).insert(ignore_permissions=True)
+        #         frappe.db.commit()
+        #     except Exception as e:
+        #         return Response(
+        #             json.dumps({"message": f"Failed to create item '{item_name}': {str(e)}"}),
+        #             status=500,
+        #             mimetype="application/json",
+        #         )
 
         if income_account and not frappe.db.exists("Account", income_account):
             return Response(
@@ -194,39 +486,24 @@ def create_simple_sales_invoice(
                 mimetype="application/json",
             )
 
+        if is_return:
+            quantity = -abs(quantity)  # Credit note quantities must be negative
+
         invoice_item = {
-            "item_name": item_code,
+            "item_name": item_name,
+            "item_code":item_docname,
             "qty": quantity,
-            "rate": rate,
+            "rate": final_rate,
             "price_list_rate": rate,
             "income_account": income_account,
             "description": description,
+            "grant_commission" : 1,
             "item_tax_template": item_tax_template,
+            "discount_amount": discount_amount_item,
         }
         invoice_items.append(invoice_item)
-    # invoice_items = []
-    # for item in items:
-    #     item_code = item["item_name"]
-    #     quantity = item.get("quantity", 0)
-    #     rate = item.get("rate", 0)
-    #     income_account = item.get("income_account")
-    #     description = item.get("description", "No description provided")
-    #     item_tax_template = item.get("item_tax_template", "")
 
-    #     if income_account and not frappe.db.exists("Account", income_account):
-    #         return Response(json.dumps({"message": f"Income Account '{income_account}' not found"}), status=404, mimetype='application/json')
-
-    #     invoice_item = {
-    #         "item_name": item_code,
-    #         "qty": quantity,
-    #         "rate": rate,
-    #         "price_list_rate": rate,
-    #         "income_account": income_account,
-    #         "description": description,
-    #         "item_tax_template": item_tax_template
-    #     }
-    #     invoice_items.append(invoice_item)
-    # Prepare taxes if provided, with category and additional fields
+    # Prepare Taxes
     taxes_list = []
     if taxes:
         for tax in taxes:
@@ -234,91 +511,109 @@ def create_simple_sales_invoice(
             account_head = tax.get("account_head")
             rate = tax.get("rate")
             description = tax.get("description", "No description provided")
+            included_in_print_rate=tax.get("included_in_print_rate")
+
 
             if charge_type and account_head and rate is not None:
-                taxes_list.append(
-                    {
-                        "charge_type": charge_type,
-                        "account_head": account_head,
-                        "rate": rate,
-                        "description": description,
-                        "tax_category": tax_category,
-                    }
-                )
-    # Create Sales Invoice with discounts and tax information
-    try:
-        new_invoice = frappe.get_doc(
-            {
-                "doctype": "Sales Invoice",
-                "customer": customer_id,
-                "posting_date": posting_date,
-                "due_date": due_date,
-                "custom_user_invoice_number": custom_user_invoice_number,
-                "custom_zatca_tax_category": tax_category,  # Include custom field
-                "items": invoice_items,
-                "taxes": taxes_list,
-                "additional_discount_percentage": discount_percentage,
-                "discount_amount": discount_amount,
-                "apply_discount_on": "Net Total",
-            }
+                taxes_list.append({
+                    "charge_type": charge_type,
+                    "account_head": account_head,
+                    "rate": rate,
+                    "description": description,
+                    "tax_category": tax_category,
+                    "included_in_print_rate" :included_in_print_rate,
+                })
+
+    # Validate if return_against is needed
+    if is_return and not return_against:
+        return Response(
+            json.dumps({"message": "return_against (original invoice id) is required for credit notes"}),
+            status=400,
+            mimetype="application/json",
         )
 
+    try:
+        # Create Sales Invoice
+        invoice_data = {
+            "doctype": "Sales Invoice",
+            "customer": customer_id,
+            "posting_date": posting_date,
+            "due_date": due_date,
+            "custom_user_invoice_number": custom_user_invoice_number,
+            "custom_zatca_tax_category": tax_category,
+            "custom_exemption_reason_code": custom_exemption_reason_code,
+            "items": invoice_items,
+            "taxes": taxes_list,
+            "discount_amount": discount_amount,
+            "apply_discount_on": "Net Total",
+            "is_return": 1 if is_return else 0,
+        }
+    
+
+        if is_return:
+            invoice_data["return_against"] = return_against  # 👈 Link to original Sales Invoice
+
+        new_invoice = frappe.get_doc(invoice_data)
+
         new_invoice.insert(ignore_permissions=True)
+    
         new_invoice.submit()
-        new_invoice.reload()  # Check the ZATCA status after submitting the invoice
-        # If ZATCA status is 503, return a 503 response
+        new_invoice.reload()
+
+        # Handle ZATCA response
         if new_invoice.custom_zatca_status == "503 Service Unavailable":
             return Response(
-                json.dumps(
-                    {
-                        "data": {
-                            "invoice_id": new_invoice.name,
-                            "uuid": new_invoice.custom_uuid,
-                            "zatca_full_response": new_invoice.custom_zatca_full_response,
-                        },
-                        "message": "Service Unavailable",
-                    }
-                ),
+                json.dumps({
+                    "data": {
+                        "invoice_id": new_invoice.name,
+                        "uuid": new_invoice.custom_uuid,
+                        "zatca_full_response": new_invoice.custom_zatca_full_response,
+                    },
+                    "message": "Service Unavailable",
+                }),
                 status=503,
                 mimetype="application/json",
             )
+
         if not new_invoice.custom_zatca_full_response:
             return Response(
-                json.dumps(
-                    {
-                        "data": {
-                            "invoice_id": new_invoice.name,
-                            "uuid": new_invoice.custom_uuid,
-                            "zatca_full_response": None,
-                        },
-                        "message": "Waiting for response",
-                    }
-                ),
-                status=202,  # 202 Accepted (still processing)
+                json.dumps({
+                    "data": {
+                        "invoice_id": new_invoice.name,
+                        "uuid": new_invoice.custom_uuid,
+                        "zatca_full_response": None,
+                    },
+                    "message": "Waiting for response",
+                }),
+                status=202,
                 mimetype="application/json",
             )
+
+        # Download XML and QR Code
         xml_content = download_xml(new_invoice.name)
         xml_str = xml_content.decode("utf-8")
-        # Prepare and return response with invoice detail if no 503 error
         qr_image_content = get_invoice_qr_image(new_invoice.name)
-        # qr_image_base64 = base64.b64encode(qr_image_content).decode("utf-8")
 
-        customer_info = {
+        response_data = {
             "invoice_id": new_invoice.name,
             "uuid": new_invoice.custom_uuid,
             "zatca_full_response": new_invoice.custom_zatca_full_response,
             "xml": xml_str,
             "qr_image": qr_image_content,
         }
+
         return Response(
-            json.dumps({"data": customer_info}), status=200, mimetype="application/json"
+            json.dumps({"data": response_data}),
+            status=200,
+            mimetype="application/json",
         )
 
     except Exception as e:
         return Response(
-            json.dumps({"message": str(e)}), status=404, mimetype="application/json"
+            json.dumps({"message": str(e)}),
+            status=404,
+            mimetype="application/json",
         )
-
 
 
 
