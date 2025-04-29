@@ -2,13 +2,30 @@
 
 This document provides instructions for integrating with the ZATCA Invoice APIs for submitting sales invoices and generating PDF/A-3 invoices with embedded XML.These APIs provide functionality that can be used for submitting invoices to ZATCA from a third-party invoicing system. Users need to create an intermediary server on Claudion.com before proceeding with this. For more details and clarifications, please contact support@claudion.com. We also have a Swagger page on the Claudion.com portal to assist developers.
 
+## 🔗 API References
+
+- 📘 **Postman Documentation**:  
+  [View the full API reference here](https://documenter.getpostman.com/view/36963652/2sAY518fmD)
+
+- 🧾 **Swagger UI Reference**:  
+  [Access Swagger docs here](https://abc) <!-- Replace 'abc' with your actual Swagger URL when ready -->
+
+## 🔄 Cross References
+
+This repo is referenced in the Postman documentation.  
+You can view it directly in Postman under:
+
+> **"You can see the GitHub repository for this app [here](https://github.com/ERPGulf/zatca_erpgulf_sync/tree/main)"**
+
 
 ---
 
 ## Submit Sales Invoice
 
 This API allows third-party systems to submit invoices to ZATCA through an intermediary server. It handles all cases, including the first submission and subsequent calls to check the status.
+
 On first submission, the intermediary server will attempt to post the invoice to ZATCA immediately. In case of success, the intermediary server will respond to the user with the QR code, XML, and full ZATCA response.
+
 If the intermediary server fails to receive a response from ZATCA immediately, it will respond with a "Waiting for Response" status.
 For any subsequent calls for the same invoice, the intermediary server will respond with the QR code, XML, and ZATCA response if available. Otherwise, it will return either a "Pending" or "Error" status. In such cases, the user needs to either re-submit (in case of "Pending") or correct the error (in case of "Error").
 
