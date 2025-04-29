@@ -337,6 +337,9 @@ def create_simple_sales_invoice(
             status=404,
             mimetype="application/json",
         )
+    intermediate_settings = frappe.get_single("Intermediate Server Setting")
+    default_items = intermediate_settings.get("items") or []
+    default_taxes = intermediate_settings.get("taxes") or []
 
     # Check for duplicate invoice by custom_user_invoice_number
     existing_invoice = frappe.get_all(
@@ -452,7 +455,8 @@ def create_simple_sales_invoice(
         quantity = item.get("quantity", 0)
         discount_amount_item = item.get("discount_amount", 0)
         rate = item.get("rate", 0)
-        income_account = item.get("income_account")
+        # income_account = item.get("income_account")
+        income_account = item.get("income_account") or (default_items[0].get("income_account") if default_items else None)
         description = item.get("description", "No description provided")
         item_tax_template = item.get("item_tax_template", "")
         final_rate = rate - discount_amount_item
@@ -507,8 +511,9 @@ def create_simple_sales_invoice(
     taxes_list = []
     if taxes:
         for tax in taxes:
-            charge_type = tax.get("charge_type")
-            account_head = tax.get("account_head")
+            # charge_type = tax.get("charge_type")
+            charge_type = tax.get("charge_type") or (default_taxes[0].get("charge_type") if default_taxes else None)
+            account_head = tax.get("account_head") or (default_taxes[0].get("account_head") if default_taxes else None)
             rate = tax.get("rate")
             description = tax.get("description", "No description provided")
             included_in_print_rate=tax.get("included_in_print_rate")

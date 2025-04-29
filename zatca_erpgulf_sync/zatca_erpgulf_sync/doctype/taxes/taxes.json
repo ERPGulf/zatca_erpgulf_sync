@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-04-29 11:50:50.340979",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "charge_type",
+  "account_head",
+  "description",
+  "included_in_print_rate"
+ ],
+ "fields": [
+  {
+   "default": "On Net Total",
+   "fieldname": "charge_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "charge_type",
+   "reqd": 1
+  },
+  {
+   "default": "5118 - Expenses Included In Valuation - ZA",
+   "fieldname": "account_head",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "account_head",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "label": "description"
+  },
+  {
+   "default": "0",
+   "fieldname": "included_in_print_rate",
+   "fieldtype": "Check",
+   "label": "included_in_print_rate"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-04-29 11:56:17.901753",
+ "modified_by": "Administrator",
+ "module": "Zatca Erpgulf Sync",
+ "name": "taxes",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

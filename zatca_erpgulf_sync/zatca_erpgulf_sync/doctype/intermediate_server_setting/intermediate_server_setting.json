@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-04-29 11:32:42.623428",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "customer_name",
+  "custom_user_invoice_number",
+  "posting_date",
+  "due_date",
+  "discount_amount",
+  "column_break_xtpr",
+  "tax_category",
+  "custom_exemption_reason_code",
+  "is_b2c",
+  "is_return",
+  "return_against",
+  "section_break_luoi",
+  "items",
+  "section_break_byye",
+  "taxes"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "customer_name"
+  },
+  {
+   "fieldname": "custom_user_invoice_number",
+   "fieldtype": "Data",
+   "label": "custom_user_invoice_number"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Data",
+   "label": "posting_date"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Data",
+   "label": "due_date"
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Float",
+   "label": "discount_amount"
+  },
+  {
+   "fieldname": "column_break_xtpr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tax_category",
+   "fieldtype": "Data",
+   "label": "tax_category"
+  },
+  {
+   "fieldname": "custom_exemption_reason_code",
+   "fieldtype": "Data",
+   "label": "custom_exemption_reason_code"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_b2c",
+   "fieldtype": "Check",
+   "label": "is_b2c"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_return",
+   "fieldtype": "Check",
+   "label": "is_return"
+  },
+  {
+   "fieldname": "return_against",
+   "fieldtype": "Data",
+   "label": "return_against"
+  },
+  {
+   "fieldname": "section_break_luoi",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "items",
+   "options": "item for intermediate server"
+  },
+  {
+   "fieldname": "section_break_byye",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Table",
+   "label": "taxes",
+   "options": "taxes"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2025-04-29 11:54:04.771423",
+ "modified_by": "Administrator",
+ "module": "Zatca Erpgulf Sync",
+ "name": "Intermediate Server Setting",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

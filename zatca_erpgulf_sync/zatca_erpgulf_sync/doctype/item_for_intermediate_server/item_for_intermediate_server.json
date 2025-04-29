@@ -1,0 +1,79 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-04-29 11:40:50.471177",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_name",
+  "quantity",
+  "rate",
+  "income_account",
+  "description",
+  "column_break_cght",
+  "discount_amount",
+  "item_tax_template"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "item_name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "quantity",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rate",
+   "reqd": 1
+  },
+  {
+   "default": "4110 - Sales - ZA",
+   "fieldname": "income_account",
+   "fieldtype": "Link",
+   "label": "income_account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "label": "description"
+  },
+  {
+   "fieldname": "column_break_cght",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Float",
+   "label": "discount_amount"
+  },
+  {
+   "fieldname": "item_tax_template",
+   "fieldtype": "Data",
+   "label": "item_tax_template"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-04-29 11:46:17.219408",
+ "modified_by": "Administrator",
+ "module": "Zatca Erpgulf Sync",
+ "name": "item for intermediate server",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
