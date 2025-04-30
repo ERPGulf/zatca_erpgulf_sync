@@ -372,6 +372,7 @@ def create_simple_sales_invoice(
     customer_details = frappe.get_all(
         "Customer", fields=["name"], filters={"customer_name": customer_name}
     )
+    tax_id = intermediate_settings.tax_id if is_b2c else ""
     if not customer_details:
         try:
             new_customer = frappe.get_doc({
@@ -382,7 +383,8 @@ def create_simple_sales_invoice(
                 "territory": "All Territories",
                 "custom_b2c": is_b2c,
                 "custom_buyer_id_type":"NAT",
-                "custom_buyer_id" :"786531"
+                "custom_buyer_id" :"786531",
+                "tax_id": tax_id
             })
             new_customer.insert(ignore_permissions=True)
             frappe.db.commit()
