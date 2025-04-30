@@ -47,6 +47,7 @@ Taxes can be applied either through the Item Tax Template (specific to each item
 If the tax setting included_in_print_rate is set to 1, the item prices are treated as tax-inclusive (i.e., tax is already included in the item rate).
 If included_in_print_rate is 0 or not set, the item prices are considered tax-exclusive, and taxes are added separately on top of the item rate during invoice calculation.EndFragment
 9. If income_account, charge_type, or account_head are not provided in the API request, the system will automatically fall back to values defined in the Intermediate Server Setting single Doctype.
+10. If the customer is marked as B2C, the system automatically retrieves the tax_id value from the Intermediate Server Setting Doctype and assigns it to the tax_id field of the newly created Customer record.
 
 
 ## Request Body
