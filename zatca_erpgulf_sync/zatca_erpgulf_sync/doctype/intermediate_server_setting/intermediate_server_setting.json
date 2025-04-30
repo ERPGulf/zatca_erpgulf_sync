@@ -16,7 +16,6 @@
   "is_b2c",
   "is_return",
   "return_against",
-  "tax_id",
   "section_break_luoi",
   "items",
   "section_break_byye",
@@ -98,18 +97,12 @@
    "fieldtype": "Table",
    "label": "taxes",
    "options": "taxes"
-  },
-  {
-   "default": "311523216200003",
-   "fieldname": "tax_id",
-   "fieldtype": "Data",
-   "label": "tax_id"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-04-30 09:47:46.423000",
+ "modified": "2025-04-30 10:41:39.577062",
  "modified_by": "Administrator",
  "module": "Zatca Erpgulf Sync",
  "name": "Intermediate Server Setting",
