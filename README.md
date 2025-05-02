@@ -8,7 +8,7 @@ This document provides instructions for integrating with the ZATCA Invoice APIs 
   [View the full API reference here](https://documenter.getpostman.com/view/36963652/2sAY518fmD)
 
 - 🧾 **Swagger UI Reference**:  
-  [Access Swagger docs here](https://abc) <!-- Replace 'abc' with your actual Swagger URL when ready -->
+  [Access Swagger docs here](https://saudi.claudion.com/swagger-zatca) <!-- Replace 'abc' with your actual Swagger URL when ready -->
 
 ## 🔄 Cross References
 
